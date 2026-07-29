@@ -29,12 +29,13 @@ st.set_page_config(
 # ------------------------------------------------------------------
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
-    html, body, [class*="css"]  { font-family: 'Poppins', sans-serif; }
+    html, body, [class*="css"]  { font-family: 'Inter', sans-serif; }
 
     .stApp {
-        background: radial-gradient(circle at 20% 0%, #1b1033 0%, #0d0a1f 45%, #060512 100%);
+        background: radial-gradient(circle at 20% 0%, #fdf2f8 0%, #eef2ff 45%, #f0fdf4 100%);
+        color: #1e1b2e !important;
     }
 
     #MainMenu, footer, header {visibility: hidden;}
@@ -44,99 +45,158 @@ st.markdown("""
         padding: 1.6rem 1rem 1.2rem 1rem;
     }
     .hero h1 {
-        font-size: 2.6rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.8rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #ff6ec7, #7873f5, #4ade80);
+        background: linear-gradient(90deg, #db2777, #7c3aed, #16a34a);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
     }
     .hero p {
-        color: #b9b3d9;
-        font-size: 1.02rem;
+        color: #4b4560;
+        font-size: 1.05rem;
         max-width: 640px;
         margin: 0 auto;
+        font-weight: 500;
     }
 
     .glass-card {
-        background: rgba(255, 255, 255, 0.045);
-        border: 1px solid rgba(255, 255, 255, 0.09);
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(0, 0, 0, 0.06);
         border-radius: 18px;
         padding: 1.5rem 1.6rem;
+        box-shadow: 0 8px 30px rgba(124, 58, 237, 0.08);
         backdrop-filter: blur(6px);
         margin-bottom: 1.1rem;
+        color: #1e1b2e !important;
+    }
+    .glass-card h4, .glass-card h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #1e1b2e !important;
     }
 
     .metric-box {
         text-align: center;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #ffffff;
+        border: 1px solid rgba(0,0,0,0.06);
         border-radius: 14px;
         padding: 0.9rem 0.4rem;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.05);
     }
-    .metric-box .val { font-size: 1.5rem; font-weight: 700; color: #fff; }
-    .metric-box .lbl { font-size: 0.78rem; color: #9d97c2; text-transform: uppercase; letter-spacing: .04em;}
+    .metric-box .val { font-size: 1.5rem; font-weight: 800; color: #1e1b2e; font-family: 'Poppins', sans-serif; }
+    .metric-box .lbl { font-size: 0.78rem; color: #6b6580; text-transform: uppercase; letter-spacing: .04em; font-weight: 600;}
 
     .result-positive {
-        background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.05));
-        border: 1px solid rgba(74,222,128,0.4);
+        background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.06));
+        border: 1px solid rgba(34,197,94,0.35);
         border-radius: 18px;
         padding: 1.6rem;
         text-align: center;
     }
     .result-negative {
-        background: linear-gradient(135deg, rgba(248,113,113,0.18), rgba(239,68,68,0.05));
-        border: 1px solid rgba(248,113,113,0.4);
+        background: linear-gradient(135deg, rgba(248,113,113,0.18), rgba(239,68,68,0.06));
+        border: 1px solid rgba(239,68,68,0.35);
         border-radius: 18px;
         padding: 1.6rem;
         text-align: center;
     }
     .result-emoji { font-size: 3.2rem; }
-    .result-label { font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 0.2rem;}
-    .result-conf { color: #cfc9ec; font-size: 0.95rem; margin-top: 0.3rem;}
+    .result-label { font-size: 1.6rem; font-weight: 800; color: #1e1b2e; margin-top: 0.2rem; font-family: 'Poppins', sans-serif;}
+    .result-conf { color: #4b4560; font-size: 0.95rem; margin-top: 0.3rem; font-weight: 500;}
 
-    .stTextArea textarea {
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+    .stTextArea textarea, .stTextInput input {
+        background: #ffffff !important;
+        border: 1.5px solid rgba(124,58,237,0.2) !important;
         border-radius: 12px !important;
-        color: #fff !important;
+        color: #1e1b2e !important;
         font-size: 1rem !important;
+        font-weight: 500 !important;
+    }
+    .stTextArea textarea::placeholder { color: #9c96b5 !important; }
+
+    .stSelectbox div[data-baseweb="select"] > div {
+        background: #ffffff !important;
+        border: 1.5px solid rgba(124,58,237,0.2) !important;
+        border-radius: 12px !important;
+        color: #1e1b2e !important;
+        font-weight: 500 !important;
+    }
+    .stSelectbox div[data-baseweb="select"] span { color: #1e1b2e !important; }
+    div[data-baseweb="popover"] li {
+        background-color: #ffffff !important;
+        color: #1e1b2e !important;
+        font-weight: 500 !important;
+    }
+    div[data-baseweb="popover"] li:hover {
+        background-color: rgba(124,58,237,0.08) !important;
     }
 
     div.stButton > button {
-        background: linear-gradient(90deg, #7873f5, #ff6ec7);
+        background: linear-gradient(90deg, #7c3aed, #db2777);
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 0.6rem 1.4rem;
-        font-weight: 600;
-        font-size: 1rem;
+        padding: 0.65rem 1.4rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.02rem;
         width: 100%;
-        transition: transform 0.15s ease;
+        box-shadow: 0 4px 18px rgba(124, 58, 237, 0.3);
+        transition: all 0.15s ease;
     }
-    div.stButton > button:hover { transform: translateY(-2px); }
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(219, 39, 119, 0.4);
+    }
 
     .chip {
         display: inline-block;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        color: #d9d5f0;
+        background: #ffffff;
+        border: 1px solid rgba(124,58,237,0.2);
+        color: #4b4560;
         border-radius: 999px;
         padding: 0.35rem 0.85rem;
         margin: 0.2rem;
         font-size: 0.85rem;
+        font-weight: 500;
         cursor: pointer;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #ffffff !important;
+        border-right: 1px solid rgba(0,0,0,0.06);
+    }
+    section[data-testid="stSidebar"] * { color: #1e1b2e !important; }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab"] {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #6b6580 !important;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #7c3aed !important;
+        border-bottom: 3px solid #db2777 !important;
+    }
+
+    /* Generic text elements (info/warning boxes, markdown, captions) */
+    p, span, li, label, .stMarkdown, .stCaption {
+        color: #2c2740 !important;
     }
 
     .footer-credit {
         text-align: center;
-        color: #85809f;
+        color: #6b6580;
         font-size: 0.85rem;
         padding: 1.6rem 0 0.6rem 0;
-        border-top: 1px solid rgba(255,255,255,0.07);
+        border-top: 1px solid rgba(0,0,0,0.06);
         margin-top: 2rem;
+        font-weight: 500;
     }
-    .footer-credit b { color: #c9c3ec; }
+    .footer-credit b { color: #1e1b2e; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -199,7 +259,7 @@ with st.sidebar:
     )
     st.markdown("---")
     st.markdown(
-        "<div style='font-size:0.8rem;color:#8b86ab;'>Built with Python, "
+        "<div style='font-size:0.8rem;color:#6b6580;'>Built with Python, "
         "Scikit-learn, Pandas &amp; Streamlit</div>",
         unsafe_allow_html=True,
     )
@@ -296,7 +356,7 @@ with tab1:
                 margin=dict(l=10, r=30, t=10, b=10),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="#e5e2f5"),
+                font=dict(color="#1e1b2e"),
                 xaxis=dict(range=[0, 100], showgrid=False, title="Probability (%)"),
                 yaxis=dict(showgrid=False),
             )
@@ -351,7 +411,7 @@ with tab2:
         title="Confusion Matrix (on held-out test reviews)",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#e5e2f5"),
+        font=dict(color="#1e1b2e"),
         height=420,
     )
     st.plotly_chart(fig_cm, use_container_width=True)
