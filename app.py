@@ -212,12 +212,42 @@ def load_artifacts():
     return vectorizer, model, metrics
 
 
+CONTRACTIONS = {
+    "isn't": "is not", "wasn't": "was not", "aren't": "are not", "weren't": "were not",
+    "don't": "do not", "doesn't": "does not", "didn't": "did not",
+    "can't": "can not", "couldn't": "could not", "won't": "will not",
+    "wouldn't": "would not", "shouldn't": "should not", "mustn't": "must not",
+    "hasn't": "has not", "haven't": "have not", "hadn't": "had not",
+}
+NEGATION_WORDS = {"not", "no", "never", "cannot", "none", "nobody", "nothing", "neither", "nor"}
+CONTRAST_WORDS = {"but", "however", "though", "although", "yet", "except"}
+
 def clean_review(text):
     text = re.sub(r"<.*?>", " ", text)
-    text = re.sub(r"[^a-zA-Z\s]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text.lower()
+    text = text.lower()
+    for contraction, expanded in CONTRACTIONS.items():
+        text = text.replace(contraction, expanded)
 
+    tokens = re.findall(r"[a-z']+|[.,!?;]", text)
+    output, negate = [], False
+    for tok in tokens:
+        if tok in ".,!?;":
+            negate = False
+            continue
+        if tok in CONTRAST_WORDS:
+            negate = False
+            output.append(tok)
+            continue
+        if tok in NEGATION_WORDS:
+            output.append(tok)
+            negate = True
+            continue
+        output.append(f"not_{tok}" if negate else tok)
+
+    cleaned = " ".join(output)
+    cleaned = re.sub(r"[^a-z_\s]", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
 
 def predict_sentiment(review, vectorizer, model):
     cleaned = clean_review(review)
