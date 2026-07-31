@@ -34,7 +34,7 @@ st.markdown("""
     html, body, [class*="css"]  { font-family: 'Poppins', sans-serif; }
 
     .stApp {
-        background: radial-gradient(circle at 20% 0%, #1b1033 0%, #0d0a1f 45%, #060512 100%);
+        background: radial-gradient(circle at 20% 0%, #f3ecff 0%, #eef2ff 45%, #f7f9ff 100%);
     }
 
     #MainMenu, footer, header {visibility: hidden;}
@@ -46,65 +46,59 @@ st.markdown("""
     .hero h1 {
         font-size: 2.6rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #ff6ec7, #7873f5, #4ade80);
+        background: linear-gradient(90deg, #d6336c, #6d28d9, #059669);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
     }
     .hero p {
-        color: #b9b3d9;
+        color: #4b4768;
         font-size: 1.02rem;
         max-width: 640px;
         margin: 0 auto;
     }
 
-    .glass-card {
-        background: rgba(255, 255, 255, 0.045);
-        border: 1px solid rgba(255, 255, 255, 0.09);
-        border-radius: 18px;
-        padding: 1.5rem 1.6rem;
-        backdrop-filter: blur(6px);
-        margin-bottom: 1.1rem;
-    }
-
     .metric-box {
         text-align: center;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #ffffff;
+        border: 1px solid #e6e1f7;
         border-radius: 14px;
         padding: 0.9rem 0.4rem;
+        box-shadow: 0 2px 10px rgba(109, 40, 217, 0.06);
     }
-    .metric-box .val { font-size: 1.5rem; font-weight: 700; color: #fff; }
-    .metric-box .lbl { font-size: 0.78rem; color: #9d97c2; text-transform: uppercase; letter-spacing: .04em;}
+    .metric-box .val { font-size: 1.5rem; font-weight: 700; color: #241f47; }
+    .metric-box .lbl { font-size: 0.78rem; color: #726d94; text-transform: uppercase; letter-spacing: .04em;}
 
     .result-positive {
-        background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(34,197,94,0.05));
-        border: 1px solid rgba(74,222,128,0.4);
+        background: linear-gradient(135deg, rgba(34,197,94,0.14), rgba(34,197,94,0.03));
+        border: 1px solid rgba(34,197,94,0.35);
         border-radius: 18px;
         padding: 1.6rem;
         text-align: center;
     }
     .result-negative {
-        background: linear-gradient(135deg, rgba(248,113,113,0.18), rgba(239,68,68,0.05));
-        border: 1px solid rgba(248,113,113,0.4);
+        background: linear-gradient(135deg, rgba(239,68,68,0.14), rgba(239,68,68,0.03));
+        border: 1px solid rgba(239,68,68,0.35);
         border-radius: 18px;
         padding: 1.6rem;
         text-align: center;
     }
     .result-emoji { font-size: 3.2rem; }
-    .result-label { font-size: 1.6rem; font-weight: 700; color: #fff; margin-top: 0.2rem;}
-    .result-conf { color: #cfc9ec; font-size: 0.95rem; margin-top: 0.3rem;}
+    .result-label { font-size: 1.6rem; font-weight: 700; color: #201c3a; margin-top: 0.2rem;}
+    .result-conf { color: #55507a; font-size: 0.95rem; margin-top: 0.3rem;}
 
     .stTextArea textarea {
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+        background: #ffffff !important;
+        border: 1.5px solid #ddd6f3 !important;
         border-radius: 12px !important;
-        color: #fff !important;
+        color: #1f1b3a !important;
         font-size: 1rem !important;
+        caret-color: #6d28d9 !important;
     }
+    .stTextArea textarea::placeholder { color: #9992b8 !important; }
 
     div.stButton > button {
-        background: linear-gradient(90deg, #7873f5, #ff6ec7);
+        background: linear-gradient(90deg, #6d28d9, #d6336c);
         color: white;
         border: none;
         border-radius: 12px;
@@ -113,30 +107,19 @@ st.markdown("""
         font-size: 1rem;
         width: 100%;
         transition: transform 0.15s ease;
+        box-shadow: 0 4px 14px rgba(109, 40, 217, 0.25);
     }
     div.stButton > button:hover { transform: translateY(-2px); }
 
-    .chip {
-        display: inline-block;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.12);
-        color: #d9d5f0;
-        border-radius: 999px;
-        padding: 0.35rem 0.85rem;
-        margin: 0.2rem;
-        font-size: 0.85rem;
-        cursor: pointer;
-    }
-
     .footer-credit {
         text-align: center;
-        color: #85809f;
+        color: #746f97;
         font-size: 0.85rem;
         padding: 1.6rem 0 0.6rem 0;
-        border-top: 1px solid rgba(255,255,255,0.07);
+        border-top: 1px solid #e6e1f7;
         margin-top: 2rem;
     }
-    .footer-credit b { color: #c9c3ec; }
+    .footer-credit b { color: #3d3768; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -329,7 +312,7 @@ with tab1:
                     margin=dict(l=10, r=30, t=10, b=10),
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
-                    font=dict(color="#e5e2f5"),
+                    font=dict(color="#241f47"),
                     xaxis=dict(range=[0, 100], showgrid=False, title="Probability (%)"),
                     yaxis=dict(showgrid=False),
                 )
@@ -382,7 +365,7 @@ with tab2:
             title="Confusion Matrix (on held-out test reviews)",
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="#e5e2f5"),
+            font=dict(color="#241f47"),
             height=420,
         )
         st.plotly_chart(fig_cm, use_container_width=True)
