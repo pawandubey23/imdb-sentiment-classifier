@@ -1,5 +1,5 @@
 """
-🎬 CineSense — AI Movie Review Sentiment Analyzer
+🎬 IntelliReview — AI Movie Review Sentiment Analyzer
 Developed by Pawan Dubey
 
 A TF-IDF + Logistic Regression sentiment classifier trained on the full
@@ -18,7 +18,7 @@ import plotly.express as px
 # Page config
 # ------------------------------------------------------------------
 st.set_page_config(
-    page_title="CineSense | AI Sentiment Analyzer",
+    page_title="IntelliReview | AI Sentiment Analyzer",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -195,7 +195,7 @@ except FileNotFoundError:
 # Sidebar
 # ------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### 🎬 CineSense")
+    st.markdown("### 🎬 IntelliReview")
     st.caption("AI-powered movie review sentiment analyzer")
     st.markdown("---")
 
@@ -226,7 +226,7 @@ with st.sidebar:
 # ------------------------------------------------------------------
 st.markdown("""
 <div class="hero">
-    <h1>🎬 CineSense</h1>
+    <h1>🎬 IntelliReview</h1>
     <p>Type any movie review below and watch the AI decide — in real time — whether it's Positive or Negative, trained on 50,000 real IMDB reviews.</p>
 </div>
 """, unsafe_allow_html=True)
@@ -376,7 +376,7 @@ with tab3:
         st.markdown("""
 #### ℹ️ About this project
 
-**CineSense** is a Natural Language Processing project that classifies movie reviews as
+**IntelliReview** is a Natural Language Processing project that classifies movie reviews as
 **positive** or **negative**, without ever being explicitly told the meaning of any word.
 
 **Pipeline**
@@ -405,7 +405,7 @@ score reflects how strongly a pattern matched the training data — not certaint
 # ------------------------------------------------------------------
 st.markdown("""
 <div class="footer-credit">
-    🎬 CineSense — AI Movie Review Sentiment Analyzer<br>
+    🎬 IntelliReview — AI Movie Review Sentiment Analyzer<br>
     Developed by <b>Pawan Dubey</b> · Built with Python, Scikit-learn &amp; Streamlit
 </div>
 """, unsafe_allow_html=True)

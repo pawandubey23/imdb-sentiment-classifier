@@ -1,4 +1,4 @@
-# 🎬 CineSense — AI Movie Review Sentiment Analyzer
+# 🎬 IntelliReview — AI Movie Review Sentiment Analyzer
 
 **Developed by Pawan Dubey**
 
@@ -53,9 +53,9 @@ The app will open at `http://localhost:8501`.
    ```bash
    git init
    git add .
-   git commit -m "CineSense: AI movie review sentiment analyzer"
+   git commit -m "IntelliReview: AI movie review sentiment analyzer"
    git branch -M main
-   git remote add origin https://github.com/<your-username>/cinesense-sentiment-analysis.git
+   git remote add origin https://github.com/<your-username>/intellireview-sentiment-analysis.git
    git push -u origin main
    ```
    > `IMDB_Dataset_50k.csv` is ~64 MB and the two `.joblib` model files are small —
@@ -66,7 +66,7 @@ The app will open at `http://localhost:8501`.
 3. Click **"New app"**, select your repo, branch `main`, and set the main file to `app.py`.
 4. Click **Deploy**. Streamlit Cloud will install `requirements.txt` and launch the app —
    your model files are already committed, so it won't need to retrain on startup.
-5. Once live, copy your app's URL (e.g. `https://cinesense-sentiment-analysis.streamlit.app`)
+5. Once live, copy your app's URL (e.g. `https://intellireview-sentiment-analysis.streamlit.app`)
    and add it to your GitHub repo description, resume, and LinkedIn post.
 
 ## 🛠️ Tech stack
