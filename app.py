@@ -185,6 +185,29 @@ def predict_sentiment(review, vectorizer, model):
     return prediction, confidence, proba
 
 
+def get_influential_words(review, vectorizer, model, top_n=6):
+    """Explainability: shows which specific words in the review pushed the
+    model's decision toward Positive or Negative, using the model's own
+    learned weight for each word combined with how strongly that word
+    appears in this particular review (its TF-IDF value)."""
+    cleaned = clean_review(review)
+    vector = vectorizer.transform([cleaned])
+    feature_names = vectorizer.get_feature_names_out()
+    coefs = model.coef_[0]
+
+    nonzero_idx = vector.nonzero()[1]
+    contributions = [(feature_names[i], vector[0, i] * coefs[i]) for i in nonzero_idx]
+    contributions.sort(key=lambda x: x[1], reverse=True)
+
+    top_positive = [c for c in contributions if c[1] > 0][:top_n]
+    top_negative = [c for c in contributions if c[1] < 0][-top_n:]
+    return top_positive, top_negative
+
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+
 try:
     vectorizer, model, metrics = load_artifacts()
     artifacts_ready = True
@@ -241,7 +264,14 @@ if not artifacts_ready:
 # ------------------------------------------------------------------
 # Tabs
 # ------------------------------------------------------------------
-tab1, tab2, tab3 = st.tabs(["🔮 Analyze a Review", "📊 Model Performance", "ℹ️ About the Project"])
+tab1, tab_batch, tab_history, tab2, tab_clouds, tab3 = st.tabs([
+    "🔮 Analyze a Review",
+    "📦 Batch Analysis",
+    "📜 History",
+    "📊 Model Performance",
+    "🔍 Word Clouds",
+    "ℹ️ About the Project",
+])
 
 # ---------------- TAB 1: Analyze ----------------
 with tab1:
@@ -281,6 +311,13 @@ with tab1:
             if analyze_clicked and user_review.strip():
                 prediction, confidence, proba = predict_sentiment(user_review, vectorizer, model)
 
+                st.session_state.history.insert(0, {
+                    "time": pd.Timestamp.now().strftime("%H:%M:%S"),
+                    "review": user_review.strip()[:120] + ("..." if len(user_review.strip()) > 120 else ""),
+                    "sentiment": "Positive" if prediction == 1 else "Negative",
+                    "confidence": f"{confidence*100:.1f}%",
+                })
+
                 if prediction == 1:
                     st.markdown(f"""
                     <div class="result-positive">
@@ -317,6 +354,26 @@ with tab1:
                     yaxis=dict(showgrid=False),
                 )
                 st.plotly_chart(fig, use_container_width=True)
+
+                top_pos, top_neg = get_influential_words(user_review, vectorizer, model)
+                if top_pos or top_neg:
+                    st.markdown("**🔬 Key words that drove this decision**")
+                    words = [w.replace("not_", "not ") for w, _ in top_neg] + [w.replace("not_", "not ") for w, _ in top_pos]
+                    values = [v for _, v in top_neg] + [v for _, v in top_pos]
+                    colors = ["#f87171"] * len(top_neg) + ["#4ade80"] * len(top_pos)
+                    fig_words = go.Figure(go.Bar(
+                        x=values, y=words, orientation="h", marker_color=colors,
+                    ))
+                    fig_words.update_layout(
+                        height=max(180, 32 * len(words)),
+                        margin=dict(l=10, r=10, t=10, b=10),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font=dict(color="#241f47", size=12),
+                        xaxis=dict(showgrid=False, title="Push toward Negative ← → Positive"),
+                        yaxis=dict(showgrid=False),
+                    )
+                    st.plotly_chart(fig_words, use_container_width=True)
 
             elif analyze_clicked:
                 st.warning("Please type a review first.")
@@ -370,6 +427,123 @@ with tab2:
         )
         st.plotly_chart(fig_cm, use_container_width=True)
 
+# ---------------- TAB: Batch Analysis ----------------
+with tab_batch:
+    with st.container(border=True):
+        st.markdown("#### 📦 Batch Analysis")
+        st.write(
+            "Upload a CSV file with a column of movie reviews to get predictions for "
+            "all of them at once — useful for analyzing a whole dataset of reviews in one go."
+        )
+
+        uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+
+        if uploaded_file is not None:
+            try:
+                batch_df = pd.read_csv(uploaded_file)
+            except Exception as e:
+                st.error(f"Could not read that file as a CSV: {e}")
+                batch_df = None
+
+            if batch_df is not None and len(batch_df) > 0:
+                text_columns = [c for c in batch_df.columns if batch_df[c].dtype == object]
+                if not text_columns:
+                    st.warning("No text columns found in this file.")
+                else:
+                    review_col = st.selectbox("Which column contains the review text?", text_columns)
+                    run_batch = st.button("🚀 Analyze All Reviews", use_container_width=True)
+
+                    if run_batch:
+                        with st.spinner(f"Analyzing {len(batch_df):,} reviews..."):
+                            texts = batch_df[review_col].astype(str).tolist()
+                            cleaned_texts = [clean_review(t) for t in texts]
+                            vectors = vectorizer.transform(cleaned_texts)
+                            preds = model.predict(vectors)
+                            probs = model.predict_proba(vectors).max(axis=1)
+
+                            batch_df["predicted_sentiment"] = np.where(preds == 1, "Positive", "Negative")
+                            batch_df["confidence"] = (probs * 100).round(1).astype(str) + "%"
+
+                        st.success(f"Done — analyzed {len(batch_df):,} reviews.")
+
+                        pos_count = int((preds == 1).sum())
+                        neg_count = int((preds == 0).sum())
+                        c1, c2 = st.columns(2)
+                        c1.metric("😊 Positive reviews", f"{pos_count:,}")
+                        c2.metric("😞 Negative reviews", f"{neg_count:,}")
+
+                        fig_batch = go.Figure(go.Bar(
+                            x=["Positive", "Negative"], y=[pos_count, neg_count],
+                            marker_color=["#4ade80", "#f87171"],
+                        ))
+                        fig_batch.update_layout(
+                            height=260, margin=dict(l=10, r=10, t=10, b=10),
+                            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                            font=dict(color="#241f47"),
+                        )
+                        st.plotly_chart(fig_batch, use_container_width=True)
+
+                        st.dataframe(batch_df, use_container_width=True)
+
+                        csv_bytes = batch_df.to_csv(index=False).encode("utf-8")
+                        st.download_button(
+                            "⬇️ Download results as CSV",
+                            data=csv_bytes,
+                            file_name="intellireview_batch_results.csv",
+                            mime="text/csv",
+                            use_container_width=True,
+                        )
+
+# ---------------- TAB: History ----------------
+with tab_history:
+    with st.container(border=True):
+        st.markdown("#### 📜 Your Analysis History")
+        st.write("Every review you analyze in the **Analyze a Review** tab during this session is logged here.")
+
+        if not st.session_state.history:
+            st.info("No reviews analyzed yet in this session. Head to the **Analyze a Review** tab to get started.")
+        else:
+            history_df = pd.DataFrame(st.session_state.history)
+            st.dataframe(history_df, use_container_width=True, hide_index=True)
+
+            c1, c2 = st.columns(2)
+            with c1:
+                csv_bytes = history_df.to_csv(index=False).encode("utf-8")
+                st.download_button(
+                    "⬇️ Download history as CSV",
+                    data=csv_bytes,
+                    file_name="intellireview_history.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                )
+            with c2:
+                if st.button("🗑️ Clear history", use_container_width=True):
+                    st.session_state.history = []
+                    st.rerun()
+
+# ---------------- TAB: Word Clouds ----------------
+with tab_clouds:
+    with st.container(border=True):
+        st.markdown("#### 🔍 What words show up most in positive vs. negative reviews?")
+        st.write(
+            "Generated from all 50,000 reviews in the training dataset — bigger words "
+            "appear more frequently in that class of review."
+        )
+
+        col_pos, col_neg = st.columns(2)
+        with col_pos:
+            st.markdown("**😊 Positive reviews**")
+            try:
+                st.image("positive_wordcloud.png", use_container_width=True)
+            except Exception:
+                st.info("Word cloud image not found. Run `train_model.py` to generate it.")
+        with col_neg:
+            st.markdown("**😞 Negative reviews**")
+            try:
+                st.image("negative_wordcloud.png", use_container_width=True)
+            except Exception:
+                st.info("Word cloud image not found. Run `train_model.py` to generate it.")
+
 # ---------------- TAB 3: About ----------------
 with tab3:
     with st.container(border=True):
@@ -393,7 +567,13 @@ with tab3:
    baseline for text classification tasks.
 6. **Evaluation** — accuracy, F1-score, and a confusion matrix on the held-out test set.
 
-**Tech stack:** Python · Pandas · Scikit-learn · TF-IDF · Logistic Regression · Streamlit · Plotly
+**Beyond a basic classifier, this project also includes:**
+- **Explainability** — every prediction shows the specific words that pushed it toward Positive or Negative, based on the model's own learned weights.
+- **Batch analysis** — upload a CSV of reviews and get predictions for all of them at once.
+- **Session history** — every review analyzed is logged and downloadable.
+- **Word clouds** — the most common words in positive vs. negative reviews across the full dataset.
+
+**Tech stack:** Python · Pandas · Scikit-learn · TF-IDF · Logistic Regression · Streamlit · Plotly · WordCloud
 
 **A note on limitations:** like any bag-of-words model, this classifier can still be fooled by
 sarcasm, idioms ("not bad" meaning "decent"), and mixed-sentiment reviews. A high confidence

@@ -22,6 +22,10 @@ import time
 import joblib
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -41,10 +45,11 @@ print("\nClass distribution:")
 print(sentiment_df["sentiment"].value_counts())
 
 print("\n" + "=" * 60)
-print("STEP 2: Clean the text (remove HTML tags, extra whitespace)")
+print("STEP 2: Clean the text (handle negation, remove HTML/punctuation)")
 print("=" * 60)
 
-
+# Common contractions that carry negation - must be expanded BEFORE punctuation
+# is stripped, or the "n't" (the negation itself) gets silently destroyed.
 CONTRACTIONS = {
     "isn't": "is not", "wasn't": "was not", "aren't": "are not", "weren't": "were not",
     "don't": "do not", "doesn't": "does not", "didn't": "did not",
@@ -52,15 +57,22 @@ CONTRACTIONS = {
     "wouldn't": "would not", "shouldn't": "should not", "mustn't": "must not",
     "hasn't": "has not", "haven't": "have not", "hadn't": "had not",
 }
+
+# Words that flip the meaning of what follows them.
 NEGATION_WORDS = {"not", "no", "never", "cannot", "none", "nobody", "nothing", "neither", "nor"}
-CONTRAST_WORDS = {"but", "however", "though", "although", "yet", "except"}
+
 
 def clean_review(text):
-    text = re.sub(r"<.*?>", " ", text)
+    text = re.sub(r"<.*?>", " ", text)  # strip HTML tags like <br />
     text = text.lower()
     for contraction, expanded in CONTRACTIONS.items():
         text = text.replace(contraction, expanded)
 
+    # Negation scoping: tag every word between a negation cue and the next
+    # punctuation mark with a "not_" prefix, e.g. "not good at all" -> "not_good not_at not_all"
+    # This is what lets the model tell "good" and "not_good" apart as different features,
+    # instead of the negation word being thrown away and only "good" surviving.
+    CONTRAST_WORDS = {"but", "however", "though", "although", "yet", "except"}
     tokens = re.findall(r"[a-z']+|[.,!?;]", text)
     output, negate = [], False
     for tok in tokens:
@@ -160,4 +172,43 @@ metrics = {
 joblib.dump(metrics, "metrics.joblib")
 
 print("Saved: vectorizer.joblib, sentiment_model.joblib, metrics.joblib")
+
+print("\n" + "=" * 60)
+print("STEP 8: Generate word clouds (positive vs negative reviews)")
+print("=" * 60)
+# Use a lightly-cleaned version of the raw text here (no negation tagging) so the
+# word clouds show natural, readable words instead of "not_good" style tokens.
+raw_df = pd.read_csv(DATA_PATH)
+raw_df.columns = ["review", "sentiment"]
+raw_df["sentiment"] = raw_df["sentiment"].map({"positive": 1, "negative": 0})
+raw_df = raw_df.dropna().drop_duplicates(subset="review").reset_index(drop=True)
+
+
+def simple_clean_for_cloud(text):
+    text = re.sub(r"<.*?>", " ", text)
+    text = re.sub(r"[^a-zA-Z\s]", " ", text)
+    return text.lower()
+
+
+raw_df["review"] = raw_df["review"].apply(simple_clean_for_cloud)
+
+positive_text = " ".join(raw_df.loc[raw_df["sentiment"] == 1, "review"].tolist())
+negative_text = " ".join(raw_df.loc[raw_df["sentiment"] == 0, "review"].tolist())
+
+extra_stopwords = {"movie", "film", "one", "will", "even", "much", "also", "really", "see", "watch"}
+wc_stopwords = set(WordCloud().stopwords) | extra_stopwords
+
+for label, text, colormap in [("positive", positive_text, "Greens"), ("negative", negative_text, "Reds")]:
+    wc = WordCloud(
+        width=900, height=500, background_color="white",
+        stopwords=wc_stopwords, colormap=colormap, max_words=120,
+    ).generate(text)
+    plt.figure(figsize=(9, 5))
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.tight_layout(pad=0)
+    plt.savefig(f"{label}_wordcloud.png", dpi=150, bbox_inches="tight", pad_inches=0.1)
+    plt.close()
+    print(f"Saved {label}_wordcloud.png")
+
 print("\nAll done.")

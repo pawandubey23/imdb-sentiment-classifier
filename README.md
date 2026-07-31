@@ -8,13 +8,23 @@ dataset**, wrapped in a polished Streamlit UI.
 
 ---
 
+## ✨ Features
+
+- **Live sentiment analysis** — type or paste a review, get an instant prediction with confidence score
+- **Explainability** — see the exact words that pushed the prediction toward Positive or Negative
+- **Batch analysis** — upload a CSV of reviews and get predictions for all of them, downloadable as CSV
+- **Session history** — every review analyzed is logged, viewable and downloadable
+- **Word clouds** — the most common words across all positive vs. negative reviews in the dataset
+- **Negation-aware** — correctly handles phrases like "not good" instead of only reading "good"
+
 ## 🧠 How it works
 
 1. **Dataset** — 50,000 real IMDB reviews (25,000 positive / 25,000 negative) — the
    classic Stanford Large Movie Review Dataset (`IMDB_Dataset_50k.csv`).
-2. **Cleaning** — HTML tags & punctuation stripped, text lowercased.
+2. **Cleaning** — HTML tags stripped, contractions expanded, negation words preserved
+   and used to tag the words they negate (so "not good" ≠ "good" to the model).
 3. **Split** — 75% train / 25% test, stratified (`random_state=42`).
-4. **Vectorization** — TF-IDF, unigrams + bigrams, 25,000-word vocabulary.
+4. **Vectorization** — TF-IDF, unigrams + bigrams, 30,000-word vocabulary.
 5. **Model** — Logistic Regression (`scikit-learn`).
 6. **Result** — ~90% accuracy on unseen test reviews.
 
@@ -23,11 +33,13 @@ dataset**, wrapped in a polished Streamlit UI.
 ```
 sentiment_app/
 ├── app.py                     # Streamlit app (the UI)
-├── train_model.py             # Trains and saves the model
+├── train_model.py             # Trains the model, saves artifacts + word clouds
 ├── IMDB_Dataset_50k.csv       # Dataset (50,000 reviews)
 ├── vectorizer.joblib          # Saved TF-IDF vectorizer
 ├── sentiment_model.joblib     # Saved trained model
 ├── metrics.joblib             # Saved accuracy/F1/confusion matrix
+├── positive_wordcloud.png     # Word cloud of positive reviews
+├── negative_wordcloud.png     # Word cloud of negative reviews
 ├── requirements.txt
 └── README.md
 ```
